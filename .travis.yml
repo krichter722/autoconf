@@ -1,0 +1,14 @@
+language: c
+compiler:
+ - gcc
+ - clang
+before_install:
+ - sudo apt-get update -qq
+ - sudo apt-get build-dep automake autoconf
+# use autoconf tarball installation to build in git
+# - 2.57 causes autoreconf in git to fail with `autom4te: unknown language: Autoconf-without-aclocal-m4` (furthermore `make check` in 2.57 tarball fails with `Subject: [GNU Autoconf 2.57] testsuite: 3 4 14 39 40 81 failed`)
+ - wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.xz && tar xf autoconf-2.69.tar.xz && cd autoconf-2.69 && ./configure && make -j24 && sudo make install && cd ..
+script: /usr/local/bin/autoreconf -ivf && ./configure --enable-tests && make -j24 && env PATH=/usr/local/bin:$PATH AUTOCONF='/usr/local/bin/autoconf' make -j24 check && sudo make install
+after_failure:
+ - cat test-suite.log
+ - cat config.log
